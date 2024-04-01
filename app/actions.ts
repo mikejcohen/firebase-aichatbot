@@ -6,6 +6,16 @@ import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
+import { getCurrentUser } from '@/lib/firebase/firebase-admin'
+
+import { collection, doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import { getApps, initializeApp } from '@firebase/app';
+import { db } from '@/lib/firebase/firebase'
+
+
+
+
+
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -31,13 +41,12 @@ export async function getChats(userId?: string | null) {
 }
 
 export async function getChat(id: string, userId: string) {
-  const chat = await kv.hgetall<Chat>(`chat:${id}`)
+  "use server"
 
-  if (!chat || (userId && chat.userId !== userId)) {
-    return null
-  }
-
-  return chat
+  const docRef = doc(collection(db, `users/${userId}/chats`), id);
+  const document = await getDoc(docRef);
+  const data = document.data()
+  return data || { id, userId, messages: [], title: 'Untitled' }
 }
 
 export async function removeChat({ id, path }: { id: string; path: string }) {
@@ -128,20 +137,14 @@ export async function shareChat(id: string) {
   return payload
 }
 
-export async function saveChat(chat: Chat) {
-  const session = await auth()
 
-  if (session && session.user) {
-    const pipeline = kv.pipeline()
-    pipeline.hmset(`chat:${chat.id}`, chat)
-    pipeline.zadd(`user:chat:${chat.userId}`, {
-      score: Date.now(),
-      member: `chat:${chat.id}`
-    })
-    await pipeline.exec()
-  } else {
-    return
-  }
+
+export async function saveChat(chat: Chat) {
+  "use server"
+  const user = await getCurrentUser()
+  chat.lastUpdated = new Date();
+  const docRef = doc(collection(db, `users/${user?.email}/chat`), chat.id);
+  return setDoc(docRef, chat);
 }
 
 export async function refreshHistory(path: string) {

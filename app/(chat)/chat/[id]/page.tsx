@@ -1,11 +1,11 @@
 import { type Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 
-import { auth } from '@/auth'
 import { getChat, getMissingKeys } from '@/app/actions'
 import { Chat } from '@/components/chat'
 import { AI } from '@/lib/chat/actions'
-import { Session } from '@/lib/types'
+import { auth } from '@/lib/firebase/firebase'
+import { getCurrentUser } from '@/lib/firebase/firebase-admin'
 
 export interface ChatPageProps {
   params: {
@@ -13,39 +13,28 @@ export interface ChatPageProps {
   }
 }
 
-export async function generateMetadata({
-  params
-}: ChatPageProps): Promise<Metadata> {
-  const session = await auth()
 
-  if (!session?.user) {
-    return {}
-  }
-
-  const chat = await getChat(params.id, session.user.id)
-  return {
-    title: chat?.title.toString().slice(0, 50) ?? 'Chat'
-  }
-}
 
 export default async function ChatPage({ params }: ChatPageProps) {
-  const session = (await auth()) as Session
+  const user = getCurrentUser() as any
+  console.log('got this user: ', user)
+  if (!user) return <div>Loading...</div>
+  const session = { email: user.email, name: user.displayName, id: user.uid } as any
+
   const missingKeys = await getMissingKeys()
 
-  if (!session?.user) {
+  if (!user) {
     redirect(`/login?next=/chat/${params.id}`)
   }
 
-  const userId = session.user.id as string
+  const userId = user.email as string
   const chat = await getChat(params.id, userId)
 
   if (!chat) {
     redirect('/')
   }
 
-  if (chat?.userId !== session?.user?.id) {
-    notFound()
-  }
+
 
   return (
     <AI initialAIState={{ chatId: chat.id, messages: chat.messages }}>

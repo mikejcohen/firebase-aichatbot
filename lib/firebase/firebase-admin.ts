@@ -1,15 +1,15 @@
 import "server-only";
 
-import { cookies } from "next/headers";
-
-import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { SessionCookieOptions, getAuth } from "firebase-admin/auth";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
+
+import { cookies } from "next/headers";
 
 export const firebaseApp =
   getApps().find((it) => it.name === "firebase-admin-app") ||
   initializeApp(
     {
-      credential: cert(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT),
+      credential: cert(process.env.FIREBASE_ADMIN_SERVICE_ACCOUNT || ""),
     },
     "firebase-admin-app"
   );
