@@ -1,4 +1,4 @@
-import { clearChats, getChats } from '@/app/actions'
+import { clearChats, getChats, saveChat } from '@/app/actions'
 
 import { Button } from './ui/button'
 import { ClearHistory } from '@/components/clear-history'
@@ -21,9 +21,7 @@ export async function SidebarList({ userId }: SidebarListProps) {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="flex-1 overflow-auto">
-        {/* <div className="space-y-2 px-2">
-          <Button onClick={() => { saveChat({ id: '1', userId: '1', messages: [], title: 'Untitled', createdAt: new Date(), path: '/chat/1' }) }}>Go</Button>
-        </div> */}
+        
         {chats?.length ? (
           <div className="space-y-2 px-2">
             <SidebarItems chats={chats} />
