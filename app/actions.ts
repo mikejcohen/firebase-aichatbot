@@ -42,10 +42,12 @@ export async function getChats(userId?: string | null) {
 
 export async function getChat(id: string, userId: string) {
   "use server"
-
-  const docRef = doc(collection(db, `users/${userId}/chats`), id);
+  const path = `users/${userId}/chat`
+  const docRef = doc(collection(db, path), id);
   const document = await getDoc(docRef);
   const data = document.data()
+
+  console.log(`"got chat ${id} at ${path} and its "`, data);
   return data || { id, userId, messages: [], title: 'Untitled' }
 }
 

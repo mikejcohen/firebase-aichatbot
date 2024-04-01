@@ -30,7 +30,6 @@ export function SidebarList({ userId }: SidebarListProps) {
   if (status === 'loading') {
     return <p>Loading...</p>;
   }
-  console.log(data)
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="flex-1 overflow-auto">

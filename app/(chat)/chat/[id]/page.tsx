@@ -16,10 +16,10 @@ export interface ChatPageProps {
 
 
 export default async function ChatPage({ params }: ChatPageProps) {
-  const user = getCurrentUser() as any
-  console.log('got this user: ', user)
+  const user = await getCurrentUser() as any
   if (!user) return <div>Loading...</div>
   const session = { email: user.email, name: user.displayName, id: user.uid } as any
+  console.log("the user is ", user)
 
   const missingKeys = await getMissingKeys()
 
